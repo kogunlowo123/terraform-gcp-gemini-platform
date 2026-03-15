@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture - terraform-gcp-gemini-platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0c0b;color:#f5f2eb;font-family:'SF Mono','Fira Code','Cascadia Code',Consolas,monospace;line-height:1.6;padding:0}
+a{color:#c8420a;text-decoration:none}a:hover{text-decoration:underline}
+.container{max-width:1200px;margin:0 auto;padding:2rem}
+.badge-bar{background:#111;border-bottom:2px solid #c8420a;padding:0.75rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.badge-bar img{height:28px}
+.badge-bar span{font-size:0.85rem;color:#aaa}
+h1{font-size:2rem;color:#c8420a;margin:1.5rem 0 0.5rem;border-bottom:1px solid #222;padding-bottom:0.5rem}
+h2{font-size:1.4rem;color:#c8420a;margin:2rem 0 1rem;border-bottom:1px solid #1a1a1a;padding-bottom:0.4rem}
+h3{font-size:1.1rem;color:#e8e0d4;margin:1.2rem 0 0.6rem}
+p,li{font-size:0.95rem;color:#ccc}
+ul{padding-left:1.5rem;margin:0.5rem 0}
+li{margin:0.3rem 0}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0}
+.card{background:#141514;border:1px solid #222;border-radius:8px;padding:1.2rem;transition:border-color 0.2s}.card:hover{border-color:#c8420a}
+.card h3{margin:0 0 0.5rem;font-size:1rem;color:#c8420a}
+.card p{font-size:0.85rem;color:#aaa;margin:0}
+.arch-diagram{background:#111;border:1px solid #222;border-radius:8px;padding:2rem;margin:1.5rem 0;overflow-x:auto}
+.flow{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:0.5rem}
+.flow-box{background:#1a1b1a;border:2px solid #333;border-radius:6px;padding:0.8rem 1.2rem;text-align:center;font-size:0.85rem;min-width:130px}
+.flow-box.accent{border-color:#c8420a;color:#c8420a;font-weight:bold}
+.flow-box.green{border-color:#34a853;color:#34a853}
+.flow-box.blue{border-color:#4285f4;color:#4285f4}
+.flow-box.purple{border-color:#9c27b0;color:#9c27b0}
+.flow-box.yellow{border-color:#fbbc04;color:#fbbc04}
+.flow-box.red{border-color:#ea4335;color:#ea4335}
+.flow-arrow{color:#555;font-size:1.5rem;display:flex;align-items:center;padding:0 0.2rem}
+.flow-col{display:flex;flex-direction:column;gap:0.5rem;align-items:center}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:0.85rem}
+th{background:#1a1b1a;color:#c8420a;padding:0.6rem 0.8rem;text-align:left;border:1px solid #222}
+td{padding:0.6rem 0.8rem;border:1px solid #222;color:#ccc}
+tr:nth-child(even){background:#111}
+code{background:#1a1b1a;padding:0.15rem 0.4rem;border-radius:3px;font-size:0.85rem;color:#e8e0d4}
+pre{background:#111;border:1px solid #222;border-radius:6px;padding:1rem;overflow-x:auto;margin:1rem 0}
+pre code{background:none;padding:0}
+.checklist{list-style:none;padding-left:0}
+.checklist li{padding:0.4rem 0;padding-left:1.8rem;position:relative}
+.checklist li::before{content:'[ ]';position:absolute;left:0;color:#c8420a;font-weight:bold}
+.section{margin:2rem 0}
+.footer{border-top:1px solid #222;margin-top:3rem;padding-top:1rem;text-align:center;font-size:0.8rem;color:#555}
+.exec-summary{background:#141514;border-left:4px solid #c8420a;padding:1.2rem 1.5rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.exec-summary p{color:#ccc;font-size:0.95rem}
+</style>
+</head>
+<body>
+<div class="badge-bar">
+<img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=flat&logo=googlecloud&logoColor=white" alt="GCP">
+<img src="https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white" alt="Terraform">
+<span>terraform-gcp-gemini-platform</span>
+<span style="margin-left:auto;color:#555">Architecture Document</span>
+</div>
+<div class="container">
+
+<h1>Gemini Platform Module</h1>
+
+<div class="section">
+<h2>Executive Summary</h2>
+<div class="exec-summary">
+<p>A Terraform module for deploying Vertex AI Generative AI infrastructure on Google Cloud Platform, enabling Retrieval-Augmented Generation (RAG) and conversational AI with Gemini models. Provisions a Cloud Storage bucket for grounding data, a Discovery Engine Data Store for structured/unstructured content ingestion, a Discovery Engine Search Engine with enterprise-tier LLM add-ons, and an optional Dialogflow CX Agent for Agent Builder-powered conversational experiences. Supports configurable industry verticals, content configurations, and comprehensive labeling.</p>
+</div>
+</div>
+
+<div class="section">
+<h2>Overview</h2>
+<div class="card-grid">
+<div class="card"><h3>Provider</h3><p>google / google-beta >= 5.10</p></div>
+<div class="card"><h3>Terraform</h3><p>>= 1.5.0</p></div>
+<div class="card"><h3>Resources</h3><p>4 (GCS Bucket, Data Store, Search Engine, Dialogflow CX Agent)</p></div>
+<div class="card"><h3>AI Tier</h3><p>SEARCH_TIER_ENTERPRISE + LLM Add-on</p></div>
+<div class="card"><h3>Patterns</h3><p>RAG, Grounded Generation, Agent Builder</p></div>
+<div class="card"><h3>Agent</h3><p>Dialogflow CX (optional)</p></div>
+</div>
+</div>
+
+<div class="section">
+<h2>Architecture Diagram</h2>
+<div class="arch-diagram">
+<div class="flow">
+<div class="flow-col">
+<div class="flow-box yellow">Cloud Storage</div>
+<div class="flow-box" style="font-size:0.75rem;border-color:#555">Grounding Data</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box red">Discovery Engine</div>
+<div class="flow-box red">Data Store</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box red">Search Engine</div>
+<div class="flow-box" style="font-size:0.75rem;border-color:#555">Enterprise + LLM</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box purple">RAG Pipeline</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box purple">Gemini Model</div>
+</div>
+</div>
+<br>
+<div class="flow">
+<div class="flow-col">
+<div class="flow-box green">Dialogflow CX Agent</div>
+<div class="flow-box" style="font-size:0.75rem;border-color:#555">Agent Builder</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box red">Search Engine</div>
+</div>
+<div class="flow-arrow" style="margin-left:1rem">+</div>
+<div class="flow-col">
+<div class="flow-box purple">Gemini Model</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box blue">Conversational AI</div>
+</div>
+</div>
+<br>
+<div class="flow">
+<div class="flow-col">
+<div class="flow-box accent">Terraform Module</div>
+</div>
+<div class="flow-arrow">&#9654;</div>
+<div class="flow-col">
+<div class="flow-box yellow">GCS Bucket</div>
+<div class="flow-box red">Data Store</div>
+<div class="flow-box red">Search Engine</div>
+<div class="flow-box green">DFCX Agent (opt)</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Component Breakdown</h2>
+<h3>google_storage_bucket.grounding</h3>
+<p>Cloud Storage bucket for grounding data with configurable location, storage class, uniform bucket-level access, and versioning. Used to store documents, PDFs, and structured data that feeds into the Discovery Engine Data Store for RAG pipelines.</p>
+<h3>google_discovery_engine_data_store.this</h3>
+<p>Discovery Engine Data Store with configurable industry vertical (GENERIC, MEDIA, HEALTHCARE_FHIR) and content configuration (CONTENT_REQUIRED, NO_CONTENT, PUBLIC_WEBSITE). Indexes content for retrieval by the Search Engine. Solution type is fixed to SOLUTION_TYPE_SEARCH.</p>
+<h3>google_discovery_engine_search_engine.this</h3>
+<p>Enterprise-tier Search Engine with SEARCH_ADD_ON_LLM enabled for Gemini-powered search. Links to the Data Store and uses the default_collection. Configurable company name for personalized search results.</p>
+<h3>google_dialogflow_cx_agent.this</h3>
+<p>Optional Dialogflow CX agent for Agent Builder conversational AI. Features Stackdriver logging, spell correction, and speech-to-text adaptation. Configurable language code and time zone. Orchestrates search and Gemini model invocations for multi-turn conversations.</p>
+</div>
+
+<div class="section">
+<h2>Data Flow</h2>
+<ul>
+<li><strong>Data Ingestion:</strong> Documents, PDFs, and structured data are uploaded to the grounding GCS bucket.</li>
+<li><strong>Indexing:</strong> The Discovery Engine Data Store ingests and indexes content from the grounding bucket, creating searchable embeddings.</li>
+<li><strong>Search & Retrieval:</strong> The Search Engine (enterprise tier + LLM add-on) processes queries against the indexed content, returning relevant passages.</li>
+<li><strong>RAG Pipeline:</strong> Retrieved passages are combined with user queries as augmented context for the Gemini model, producing grounded responses.</li>
+<li><strong>Conversational AI:</strong> The Dialogflow CX agent orchestrates multi-turn conversations, invoking the Search Engine for retrieval and Gemini for response generation.</li>
+<li><strong>Speech Integration:</strong> The DFCX agent supports speech-to-text with adaptation for voice-based interactions.</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Security Controls</h2>
+<table>
+<tr><th>Control</th><th>Implementation</th></tr>
+<tr><td>Data Encryption</td><td>GCS bucket with Google-managed encryption; uniform bucket-level access</td></tr>
+<tr><td>Versioning</td><td>Grounding bucket versioning (default: true) for data lineage and rollback</td></tr>
+<tr><td>Access Control</td><td>Uniform bucket-level access with IAM-only permissions</td></tr>
+<tr><td>Logging</td><td>Dialogflow CX Stackdriver logging enabled for audit and debugging</td></tr>
+<tr><td>Data Residency</td><td>Configurable location for GCS bucket and Discovery Engine resources</td></tr>
+<tr><td>Resource Labeling</td><td>Consistent labels across all resources for governance and tracking</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>Industry Adaptation</h2>
+<ul>
+<li><strong>Enterprise Knowledge Base:</strong> Index internal documentation, policies, and FAQs in the Data Store. Gemini provides grounded answers via RAG. Dialogflow CX agent serves as an internal assistant.</li>
+<li><strong>Customer Support:</strong> Agent Builder-powered chatbot with enterprise search over support documentation, product manuals, and knowledge articles. Multi-language support via DFCX.</li>
+<li><strong>Healthcare:</strong> HEALTHCARE_FHIR industry vertical for medical knowledge bases. Grounded responses from clinical guidelines and research papers.</li>
+<li><strong>E-Commerce:</strong> Product catalog search with LLM-enhanced results. Conversational shopping assistant via Dialogflow CX with product recommendations.</li>
+<li><strong>Legal / Compliance:</strong> Index regulatory documents and contracts. RAG-powered search for clause identification and compliance queries.</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Production Readiness Checklist</h2>
+<ul class="checklist">
+<li>Enable versioning on the grounding bucket for data lineage</li>
+<li>Configure uniform bucket-level access (default: true)</li>
+<li>Set appropriate industry vertical for the Data Store (GENERIC, MEDIA, HEALTHCARE_FHIR)</li>
+<li>Choose correct content config (CONTENT_REQUIRED for documents, PUBLIC_WEBSITE for web crawl)</li>
+<li>Test Search Engine relevance before production deployment</li>
+<li>Enable Dialogflow CX agent only when conversational AI is needed</li>
+<li>Configure DFCX language code and time zone for target audience</li>
+<li>Apply consistent labels for cost tracking across all resources</li>
+<li>Set up data ingestion pipelines to keep the grounding bucket current</li>
+<li>Monitor Search Engine quality metrics and tune as needed</li>
+<li>Plan for data refresh cycles in the Data Store</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>Configuration Reference</h2>
+<h3>Required Variables</h3>
+<table>
+<tr><th>Name</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>project_id</code></td><td>string</td><td>GCP project ID</td></tr>
+<tr><td><code>data_store_id</code></td><td>string</td><td>Discovery Engine Data Store ID</td></tr>
+<tr><td><code>search_engine_id</code></td><td>string</td><td>Discovery Engine Search Engine ID</td></tr>
+<tr><td><code>grounding_bucket_name</code></td><td>string</td><td>GCS bucket name for grounding data</td></tr>
+</table>
+<h3>Key Optional Variables</h3>
+<table>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>region</code></td><td>string</td><td>us-central1</td><td>GCP region</td></tr>
+<tr><td><code>data_store_industry_vertical</code></td><td>string</td><td>GENERIC</td><td>Industry vertical (GENERIC, MEDIA, HEALTHCARE_FHIR)</td></tr>
+<tr><td><code>data_store_content_config</code></td><td>string</td><td>CONTENT_REQUIRED</td><td>Content configuration</td></tr>
+<tr><td><code>enable_dialogflow_agent</code></td><td>bool</td><td>true</td><td>Create Dialogflow CX agent</td></tr>
+<tr><td><code>dialogflow_agent_display_name</code></td><td>string</td><td>gemini-agent</td><td>DFCX agent display name</td></tr>
+<tr><td><code>grounding_bucket_location</code></td><td>string</td><td>US</td><td>GCS bucket location</td></tr>
+<tr><td><code>labels</code></td><td>map(string)</td><td>{}</td><td>Labels for all resources</td></tr>
+</table>
+<h3>Outputs</h3>
+<table>
+<tr><th>Name</th><th>Description</th></tr>
+<tr><td><code>data_store_id</code></td><td>Discovery Engine Data Store ID</td></tr>
+<tr><td><code>data_store_name</code></td><td>Full resource name of the Data Store</td></tr>
+<tr><td><code>search_engine_id</code></td><td>Discovery Engine Search Engine ID</td></tr>
+<tr><td><code>dialogflow_agent_id</code></td><td>Dialogflow CX agent ID (null if disabled)</td></tr>
+<tr><td><code>grounding_bucket_name</code></td><td>Grounding bucket name</td></tr>
+<tr><td><code>grounding_bucket_url</code></td><td>Grounding bucket URL (gs://...)</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>Deployment</h2>
+<pre><code>module "gemini_platform" {
+  source = "github.com/kogunlowo123/terraform-gcp-gemini-platform"
+
+  project_id = "my-project"
+  region     = "us-central1"
+
+  # Data Store
+  data_store_id                = "prod-knowledge-base"
+  data_store_display_name      = "Production Knowledge Base"
+  data_store_industry_vertical = "GENERIC"
+  data_store_content_config    = "CONTENT_REQUIRED"
+
+  # Search Engine
+  search_engine_id           = "prod-search"
+  search_engine_display_name = "Production Search"
+
+  # Grounding Bucket
+  grounding_bucket_name     = "my-project-gemini-grounding-prod"
+  grounding_bucket_location = "US"
+
+  # Dialogflow CX Agent
+  enable_dialogflow_agent       = true
+  dialogflow_agent_display_name = "Production AI Assistant"
+  dialogflow_agent_time_zone    = "America/New_York"
+
+  labels = {
+    environment = "production"
+    team        = "ai-platform"
+    cost_center = "ml-ops"
+  }
+}</code></pre>
+</div>
+
+<div class="section">
+<h2>Links</h2>
+<ul>
+<li><a href="https://cloud.google.com/generative-ai-app-builder/docs">Vertex AI Agent Builder Documentation</a></li>
+<li><a href="https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es">Discovery Engine Data Store</a></li>
+<li><a href="https://cloud.google.com/dialogflow/cx/docs">Dialogflow CX Documentation</a></li>
+<li><a href="https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview">Grounding with Vertex AI</a></li>
+<li><a href="../README.md">Module README</a></li>
+</ul>
+</div>
+
+<div class="footer">
+<p>terraform-gcp-gemini-platform &middot; Architecture Document &middot; Generated 2026-03-15</p>
+<p style="color:#333;margin-top:0.3rem">Built for Google Cloud Platform</p>
+</div>
+</div>
+</body>
+</html>
