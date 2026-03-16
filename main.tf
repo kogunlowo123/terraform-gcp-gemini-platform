@@ -7,7 +7,7 @@ resource "google_storage_bucket" "grounding" {
   location                    = var.grounding_bucket_location
   storage_class               = var.grounding_bucket_storage_class
   uniform_bucket_level_access = var.grounding_bucket_uniform_access
-  labels                      = local.default_labels
+  labels                      = var.labels
 
   versioning {
     enabled = var.grounding_bucket_versioning
@@ -21,7 +21,7 @@ resource "google_storage_bucket" "grounding" {
 # ---------------------------------------------------------------------------------------------------------------------
 resource "google_discovery_engine_data_store" "this" {
   project                    = var.project_id
-  location                   = local.location
+  location                   = var.region
   data_store_id              = var.data_store_id
   display_name               = var.data_store_display_name
   industry_vertical          = var.data_store_industry_vertical
@@ -34,7 +34,7 @@ resource "google_discovery_engine_data_store" "this" {
 # ---------------------------------------------------------------------------------------------------------------------
 resource "google_discovery_engine_search_engine" "this" {
   project        = var.project_id
-  location       = local.location
+  location       = var.region
   engine_id      = var.search_engine_id
   display_name   = var.search_engine_display_name
   data_store_ids = [google_discovery_engine_data_store.this.data_store_id]
@@ -57,7 +57,7 @@ resource "google_dialogflow_cx_agent" "this" {
   count = var.enable_dialogflow_agent ? 1 : 0
 
   project                    = var.project_id
-  location                   = local.location
+  location                   = var.region
   display_name               = var.dialogflow_agent_display_name
   default_language_code      = var.dialogflow_agent_default_language_code
   time_zone                  = var.dialogflow_agent_time_zone
