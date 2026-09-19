@@ -11,14 +11,14 @@ module "gemini_platform" {
   data_store_content_config    = "CONTENT_REQUIRED"
 
   # Search Engine configuration
-  search_engine_id          = "complete-search-engine"
+  search_engine_id           = "complete-search-engine"
   search_engine_display_name = "Complete Search Engine"
   search_engine_type         = "SEARCH"
 
   # Grounding bucket configuration
-  grounding_bucket_name          = "my-project-gemini-grounding-complete"
-  grounding_bucket_location      = "US"
-  grounding_bucket_storage_class = "STANDARD"
+  grounding_bucket_name           = "my-project-gemini-grounding-complete"
+  grounding_bucket_location       = "US"
+  grounding_bucket_storage_class  = "STANDARD"
   grounding_bucket_uniform_access = true
   grounding_bucket_versioning     = true
 

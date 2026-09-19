@@ -20,13 +20,13 @@ resource "google_storage_bucket" "grounding" {
 # Discovery Engine Data Store
 # ---------------------------------------------------------------------------------------------------------------------
 resource "google_discovery_engine_data_store" "this" {
-  project                    = var.project_id
-  location                   = var.region
-  data_store_id              = var.data_store_id
-  display_name               = var.data_store_display_name
-  industry_vertical          = var.data_store_industry_vertical
-  content_config             = var.data_store_content_config
-  solution_types             = ["SOLUTION_TYPE_SEARCH"]
+  project           = var.project_id
+  location          = var.region
+  data_store_id     = var.data_store_id
+  display_name      = var.data_store_display_name
+  industry_vertical = var.data_store_industry_vertical
+  content_config    = var.data_store_content_config
+  solution_types    = ["SOLUTION_TYPE_SEARCH"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
